@@ -1,0 +1,77 @@
+[
+  {
+    "id": "DRV_1",
+    "name": "Азамат Серіков",
+    "truckType": "Тент (Еврофура)",
+    "plate": "128 АС 12",
+    "capacity": 30,
+    "rating": 4.9,
+    "trips": 142,
+    "phone": "+7 701 555 12 34",
+    "status": "free",
+    "cargoTypes": [
+      "cement",
+      "equipment",
+      "general"
+    ]
+  },
+  {
+    "id": "DRV_2",
+    "name": "Бақыт Жақсыбеков",
+    "truckType": "Самосвал",
+    "plate": "777 BА 02",
+    "capacity": 25,
+    "rating": 4.7,
+    "trips": 98,
+    "phone": "+7 702 333 45 67",
+    "status": "free",
+    "cargoTypes": [
+      "cement",
+      "equipment"
+    ]
+  },
+  {
+    "id": "DRV_3",
+    "name": "Нұрлан Әбенов",
+    "truckType": "Рефрижератор",
+    "plate": "017 МА 17",
+    "capacity": 20,
+    "rating": 4.8,
+    "trips": 211,
+    "phone": "+7 705 111 78 90",
+    "status": "free",
+    "cargoTypes": [
+      "food"
+    ]
+  },
+  {
+    "id": "DRV_4",
+    "name": "Ержан Байменов",
+    "truckType": "Борт",
+    "plate": "555 KZ 05",
+    "capacity": 15,
+    "rating": 4.6,
+    "trips": 67,
+    "phone": "+7 777 222 33 44",
+    "status": "free",
+    "cargoTypes": [
+      "equipment",
+      "general",
+      "cement"
+    ]
+  },
+  {
+    "id": "DRV_5",
+    "name": "Дастан Омаров",
+    "truckType": "Цистерна",
+    "plate": "099 ТА 09",
+    "capacity": 22,
+    "rating": 4.5,
+    "trips": 53,
+    "phone": "+7 747 999 00 11",
+    "status": "free",
+    "cargoTypes": [
+      "general"
+    ]
+  }
+]

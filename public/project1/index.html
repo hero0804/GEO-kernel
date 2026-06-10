@@ -1,0 +1,2183 @@
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Geo-kernel• MVP</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+            rel="stylesheet"
+        />
+        <link
+            rel="stylesheet"
+            href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <style>
+            *,
+            *::before,
+            *::after {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+            :root {
+                --bg: #f1f5f9;
+                --surface: #ffffff;
+                --surface2: #f8fafc;
+                --border: #e2e8f0;
+                --text: #0f172a;
+                --text2: #64748b;
+                --text3: #94a3b8;
+                --indigo: #0172a3;
+                --indigo-light: #e6f3f9;
+                --indigo-hover: #015a82;
+                --emerald: #10b981;
+                --emerald-light: #d1fae5;
+                --amber: #f59e0b;
+                --amber-light: #fef3c7;
+                --red: #ef4444;
+                --red-light: #fee2e2;
+                --blue: #3b82f6;
+                --blue-light: #dbeafe;
+                --radius: 12px;
+                --radius-sm: 8px;
+                --shadow:
+                    0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.05);
+                --shadow-md:
+                    0 4px 6px -1px rgba(0, 0, 0, 0.08),
+                    0 2px 4px -2px rgba(0, 0, 0, 0.05);
+                --shadow-lg:
+                    0 10px 15px -3px rgba(0, 0, 0, 0.08),
+                    0 4px 6px -4px rgba(0, 0, 0, 0.05);
+            }
+            body {
+                font-family: "Inter", sans-serif;
+                background: var(--bg);
+                color: var(--text);
+                min-height: 100vh;
+                font-size: 14px;
+            }
+
+            /* ── HEADER */
+            .header {
+                background: var(--surface);
+                border-bottom: 1px solid var(--border);
+                padding: 0 24px;
+                height: 64px;
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                position: sticky;
+                top: 0;
+                z-index: 100;
+                box-shadow: var(--shadow);
+            }
+            .logo-icon {
+                width: 44px;
+                height: 44px;
+                background: #ffffff;
+                border: 1px solid var(--border);
+                border-radius: 10px;
+                padding: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 18px;
+                flex-shrink: 0;
+            }
+            .logo-icon img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                display: block;
+            }
+            .logo-text h1 {
+                font-size: 16px;
+                font-weight: 700;
+                color: var(--text);
+                line-height: 1;
+            }
+            .logo-text p {
+                font-size: 11px;
+                color: var(--text2);
+                margin-top: 2px;
+            }
+            .badge-mvp {
+                background: var(--indigo-light);
+                color: var(--indigo);
+                font-size: 10px;
+                font-weight: 700;
+                padding: 2px 6px;
+                border-radius: 4px;
+                letter-spacing: 0.5px;
+            }
+            .header-center {
+                flex: 1;
+                display: flex;
+                justify-content: center;
+            }
+            .tab-switch {
+                display: flex;
+                background: var(--bg);
+                border-radius: 10px;
+                padding: 3px;
+                gap: 2px;
+            }
+            .tab-btn {
+                padding: 8px 18px;
+                border-radius: 8px;
+                border: none;
+                cursor: pointer;
+                font-size: 13px;
+                font-weight: 500;
+                color: var(--text2);
+                background: transparent;
+                transition: all 0.2s;
+                white-space: nowrap;
+            }
+            .tab-btn.active {
+                background: var(--surface);
+                color: var(--text);
+                box-shadow: var(--shadow);
+                font-weight: 600;
+            }
+            .header-right {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            .sync-badge {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 11px;
+                font-family: "JetBrains Mono", monospace;
+                color: var(--text2);
+            }
+            .sync-dot {
+                width: 7px;
+                height: 7px;
+                border-radius: 50%;
+                background: var(--emerald);
+                animation: pulse 2s infinite;
+            }
+            @keyframes pulse {
+                0%,
+                100% {
+                    opacity: 1;
+                }
+                50% {
+                    opacity: 0.4;
+                }
+            }
+            .notif-btn {
+                width: 36px;
+                height: 36px;
+                border-radius: 9px;
+                border: 1px solid var(--border);
+                background: var(--surface);
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                position: relative;
+                font-size: 16px;
+                transition: background 0.15s;
+            }
+            .notif-btn:hover {
+                background: var(--surface2);
+            }
+            .notif-badge {
+                position: absolute;
+                top: -4px;
+                right: -4px;
+                width: 16px;
+                height: 16px;
+                background: var(--red);
+                border-radius: 50%;
+                color: #fff;
+                font-size: 9px;
+                font-weight: 700;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 2px solid var(--surface);
+            }
+
+            /* ── INFO BANNER (carrier mode) */
+            .info-banner {
+                background: var(--indigo);
+                color: #fff;
+                padding: 10px 24px;
+                font-size: 13px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .info-banner a {
+                color: #cdeaf6;
+                cursor: pointer;
+                text-decoration: underline;
+            }
+            .hidden {
+                display: none !important;
+            }
+
+            /* ── MAIN LAYOUT */
+            .main {
+                padding: 24px;
+                max-width: 1400px;
+                margin: 0 auto;
+                display: grid;
+                gap: 24px;
+            }
+            .two-col {
+                grid-template-columns: 1fr 1fr;
+            }
+            .three-col {
+                grid-template-columns: 360px 1fr;
+            }
+
+            /* ── CARD */
+            .card {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                padding: 20px;
+                box-shadow: var(--shadow);
+            }
+            .card-title {
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--text);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 16px;
+            }
+            .card-title .icon {
+                font-size: 16px;
+            }
+
+            /* ── FORM */
+            .form-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                margin-bottom: 12px;
+            }
+            .form-group {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+            .form-group label {
+                font-size: 11px;
+                font-weight: 600;
+                color: var(--text2);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            .form-control {
+                padding: 9px 12px;
+                border: 1px solid var(--border);
+                border-radius: var(--radius-sm);
+                font-size: 14px;
+                font-family: "Inter", sans-serif;
+                color: var(--text);
+                background: var(--surface);
+                outline: none;
+                transition:
+                    border-color 0.15s,
+                    box-shadow 0.15s;
+                width: 100%;
+            }
+            .form-control:focus {
+                border-color: var(--indigo);
+                box-shadow: 0 0 0 3px rgba(1, 114, 163, 0.1);
+            }
+            .form-control:disabled {
+                background: var(--surface2);
+                color: var(--text2);
+            }
+            select.form-control {
+                cursor: pointer;
+            }
+
+            /* ── BILLING BOX */
+            .billing-box {
+                border: 1px solid var(--border);
+                border-radius: var(--radius-sm);
+                padding: 14px;
+                margin: 14px 0;
+                background: var(--surface2);
+            }
+            .billing-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 8px;
+            }
+            .billing-label {
+                font-size: 11px;
+                font-weight: 600;
+                color: var(--text2);
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .badge-optimal {
+                background: var(--emerald-light);
+                color: #059669;
+                font-size: 10px;
+                font-weight: 700;
+                padding: 2px 8px;
+                border-radius: 4px;
+            }
+            .billing-formula {
+                font-size: 12px;
+                color: var(--text2);
+                font-family: "JetBrains Mono", monospace;
+                margin-bottom: 6px;
+            }
+            .billing-price {
+                font-size: 22px;
+                font-weight: 700;
+                color: var(--indigo);
+            }
+
+            /* ── BUTTON */
+            .btn {
+                padding: 11px 20px;
+                border-radius: var(--radius-sm);
+                border: none;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 600;
+                font-family: "Inter", sans-serif;
+                transition: all 0.15s;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+            }
+            .btn-primary {
+                background: var(--indigo);
+                color: #fff;
+                width: 100%;
+            }
+            .btn-primary:hover {
+                background: var(--indigo-hover);
+                transform: translateY(-1px);
+                box-shadow: var(--shadow-md);
+            }
+            .btn-primary:active {
+                transform: translateY(0);
+            }
+            .btn-success {
+                background: var(--emerald);
+                color: #fff;
+            }
+            .btn-success:hover {
+                background: #059669;
+            }
+            .btn-sm {
+                padding: 7px 14px;
+                font-size: 13px;
+            }
+            .btn-outline {
+                background: transparent;
+                border: 1px solid var(--border);
+                color: var(--text);
+                font-size: 13px;
+                padding: 7px 14px;
+            }
+            .btn-outline:hover {
+                background: var(--surface2);
+            }
+            .btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                transform: none !important;
+            }
+
+            /* ── STATUS BADGES */
+            .status {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 3px 10px;
+                border-radius: 999px;
+                font-size: 12px;
+                font-weight: 600;
+            }
+            .status::before {
+                content: "";
+                width: 6px;
+                height: 6px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+            .status-available {
+                background: var(--blue-light);
+                color: #1d4ed8;
+            }
+            .status-available::before {
+                background: #1d4ed8;
+            }
+            .status-in_transit {
+                background: var(--amber-light);
+                color: #b45309;
+            }
+            .status-in_transit::before {
+                background: var(--amber);
+            }
+            .status-delivered {
+                background: var(--emerald-light);
+                color: #059669;
+            }
+            .status-delivered::before {
+                background: var(--emerald);
+            }
+            .status-free {
+                background: var(--emerald-light);
+                color: #059669;
+            }
+            .status-free::before {
+                background: var(--emerald);
+            }
+            .status-busy {
+                background: var(--amber-light);
+                color: #b45309;
+            }
+            .status-busy::before {
+                background: var(--amber);
+            }
+
+            /* ── ORDERS TABLE */
+            .orders-table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 13px;
+            }
+            .orders-table th {
+                text-align: left;
+                padding: 8px 12px;
+                font-size: 11px;
+                font-weight: 600;
+                color: var(--text2);
+                text-transform: uppercase;
+                letter-spacing: 0.4px;
+                border-bottom: 1px solid var(--border);
+            }
+            .orders-table td {
+                padding: 12px 12px;
+                border-bottom: 1px solid var(--border);
+                vertical-align: middle;
+            }
+            .orders-table tr:last-child td {
+                border-bottom: none;
+            }
+            .orders-table tr:hover td {
+                background: var(--surface2);
+            }
+            .order-cargo {
+                font-weight: 600;
+                color: var(--text);
+            }
+            .order-meta {
+                font-size: 11px;
+                color: var(--text2);
+                margin-top: 2px;
+                font-family: "JetBrains Mono", monospace;
+            }
+            .order-route {
+                color: var(--text);
+                font-weight: 500;
+            }
+            .order-price {
+                font-weight: 700;
+                color: var(--text);
+                font-family: "JetBrains Mono", monospace;
+            }
+            .driver-name {
+                font-weight: 500;
+                color: var(--text);
+            }
+            .driver-phone {
+                font-size: 11px;
+                color: var(--indigo);
+                margin-top: 2px;
+            }
+            .empty-state {
+                text-align: center;
+                padding: 32px;
+                color: var(--text2);
+            }
+            .empty-state .big {
+                font-size: 32px;
+                margin-bottom: 8px;
+            }
+
+            /* ── MAP */
+            #map-shipper,
+            #map-carrier {
+                height: 320px;
+                border-radius: var(--radius-sm);
+                overflow: hidden;
+                border: 1px solid var(--border);
+            }
+
+            /* ── CARRIER: PROFILE CARD */
+            .driver-profile {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
+            .driver-selector label {
+                font-size: 11px;
+                font-weight: 600;
+                color: var(--text2);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                display: block;
+                margin-bottom: 5px;
+            }
+            .driver-info-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+            .driver-info-row {
+                display: flex;
+                flex-direction: column;
+                gap: 2px;
+                padding: 8px 0;
+                border-bottom: 1px solid var(--border);
+            }
+            .driver-info-row:last-child {
+                border-bottom: none;
+            }
+            .driver-info-label {
+                font-size: 11px;
+                color: var(--text2);
+                font-weight: 500;
+            }
+            .driver-info-value {
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--text);
+            }
+            .rating-stars {
+                color: var(--amber);
+            }
+
+            /* ── FILTER */
+            .filter-section {
+                margin-top: 16px;
+            }
+            .filter-title {
+                font-size: 11px;
+                font-weight: 600;
+                color: var(--text2);
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 10px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .range-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 6px;
+                font-size: 13px;
+            }
+            .range-val {
+                font-weight: 600;
+                color: var(--indigo);
+            }
+            input[type="range"] {
+                width: 100%;
+                accent-color: var(--indigo);
+                margin-bottom: 12px;
+            }
+
+            /* ── LIVE FEED */
+            .live-feed-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 14px;
+            }
+            .live-count {
+                background: var(--indigo-light);
+                color: var(--indigo);
+                font-size: 11px;
+                font-weight: 700;
+                padding: 3px 10px;
+                border-radius: 999px;
+                font-family: "JetBrains Mono", monospace;
+            }
+            .feed-card {
+                border: 1px solid var(--border);
+                border-radius: var(--radius-sm);
+                padding: 14px;
+                margin-bottom: 10px;
+                background: var(--surface);
+                transition: box-shadow 0.2s;
+            }
+            .feed-card:hover {
+                box-shadow: var(--shadow-md);
+            }
+            .feed-card-header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                margin-bottom: 8px;
+            }
+            .feed-cargo-name {
+                font-size: 15px;
+                font-weight: 700;
+                color: var(--text);
+            }
+            .feed-cargo-tons {
+                font-size: 13px;
+                color: var(--text2);
+                margin-top: 1px;
+            }
+            .feed-route {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 13px;
+                color: var(--text2);
+                margin-bottom: 8px;
+            }
+            .feed-route strong {
+                color: var(--text);
+                font-weight: 600;
+            }
+            .feed-arrow {
+                color: var(--text3);
+            }
+            .feed-meta {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+            }
+            .feed-price {
+                font-size: 16px;
+                font-weight: 700;
+                color: var(--indigo);
+                font-family: "JetBrains Mono", monospace;
+            }
+            .feed-shipper {
+                font-size: 11px;
+                color: var(--text2);
+            }
+            .feed-shipper strong {
+                color: var(--text);
+            }
+
+            /* ── ACTIVE TRIP CARD */
+            .active-trip {
+                border: 2px solid var(--indigo);
+                border-radius: var(--radius);
+                padding: 16px;
+                background: linear-gradient(
+                    135deg,
+                    var(--indigo-light) 0%,
+                    var(--surface) 100%
+                );
+            }
+            .active-trip-header {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+            .active-trip-dot {
+                width: 10px;
+                height: 10px;
+                background: var(--indigo);
+                border-radius: 50%;
+                animation: pulse 1.5s infinite;
+            }
+            .active-trip-label {
+                font-size: 13px;
+                font-weight: 700;
+                color: var(--indigo);
+            }
+            .trip-info-row {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                margin-bottom: 12px;
+            }
+            .trip-field {
+                font-size: 12px;
+                color: var(--text2);
+            }
+            .trip-field strong {
+                display: block;
+                font-size: 14px;
+                font-weight: 600;
+                color: var(--text);
+            }
+            .shipper-contact {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: var(--radius-sm);
+                padding: 10px 14px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 10px;
+            }
+            .call-btn {
+                background: var(--emerald-light);
+                color: #059669;
+                border: none;
+                padding: 5px 12px;
+                border-radius: 6px;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }
+
+            /* ── NOTIFICATIONS */
+            .notif-panel {
+                position: absolute;
+                top: 100%;
+                right: 0;
+                width: 340px;
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                box-shadow: var(--shadow-lg);
+                z-index: 200;
+                overflow: hidden;
+            }
+            .notif-panel-header {
+                padding: 12px 16px;
+                border-bottom: 1px solid var(--border);
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--text);
+            }
+            .notif-list {
+                max-height: 300px;
+                overflow-y: auto;
+            }
+            .notif-item {
+                padding: 12px 16px;
+                border-bottom: 1px solid var(--border);
+                display: flex;
+                gap: 10px;
+                align-items: flex-start;
+            }
+            .notif-item:last-child {
+                border-bottom: none;
+            }
+            .notif-dot {
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background: var(--indigo);
+                flex-shrink: 0;
+                margin-top: 4px;
+            }
+            .notif-text {
+                font-size: 13px;
+                color: var(--text);
+                line-height: 1.4;
+            }
+            .notif-time {
+                font-size: 11px;
+                color: var(--text2);
+                margin-top: 2px;
+            }
+
+            /* ── TOAST */
+            .toast-container {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                z-index: 1000;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                pointer-events: none;
+            }
+            .toast {
+                background: var(--surface);
+                border: 1px solid var(--border);
+                border-radius: var(--radius);
+                padding: 14px 18px;
+                box-shadow: var(--shadow-lg);
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                min-width: 280px;
+                max-width: 360px;
+                pointer-events: all;
+                animation: slideIn 0.3s ease;
+            }
+            @keyframes slideIn {
+                from {
+                    transform: translateX(120%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            .toast-icon {
+                font-size: 20px;
+            }
+            .toast-title {
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--text);
+            }
+            .toast-body {
+                font-size: 12px;
+                color: var(--text2);
+                margin-top: 2px;
+            }
+
+            /* ── FOOTER */
+            .footer-bar {
+                border-top: 1px solid var(--border);
+                padding: 12px 24px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                font-size: 11px;
+                color: var(--text2);
+                background: var(--surface);
+                margin-top: auto;
+            }
+
+            /* ── DIVIDER */
+            .section-divider {
+                border: none;
+                border-top: 1px solid var(--border);
+                margin: 16px 0;
+            }
+
+            /* ── INFO СПРАВКА */
+            .info-box {
+                background: var(--surface2);
+                border: 1px solid var(--border);
+                border-radius: var(--radius-sm);
+                padding: 14px;
+                font-size: 12px;
+                color: var(--text2);
+                line-height: 1.6;
+            }
+
+            /* responsive */
+            /* ── TABLET (≤900px): collapse multi-column layouts */
+            @media (max-width: 900px) {
+                .three-col {
+                    grid-template-columns: 1fr;
+                }
+                .two-col {
+                    grid-template-columns: 1fr;
+                }
+                .form-row {
+                    grid-template-columns: 1fr;
+                }
+                .driver-info-grid {
+                    grid-template-columns: 1fr;
+                }
+                .main {
+                    padding: 16px;
+                    gap: 16px;
+                }
+                /* Header wraps: tabs drop to a full-width row below the logo */
+                .header {
+                    height: auto;
+                    flex-wrap: wrap;
+                    padding: 10px 16px;
+                    row-gap: 10px;
+                }
+                .header-center {
+                    order: 3;
+                    flex-basis: 100%;
+                }
+                .tab-switch {
+                    width: 100%;
+                }
+                .tab-btn {
+                    flex: 1;
+                    text-align: center;
+                }
+                .header-right {
+                    margin-left: auto;
+                }
+            }
+
+            /* ── PHONE (≤640px): tighten spacing, touch targets, hide noise */
+            @media (max-width: 640px) {
+                .main {
+                    padding: 12px;
+                    gap: 12px;
+                }
+                .card {
+                    padding: 16px;
+                }
+                .header {
+                    padding: 8px 12px;
+                    gap: 10px;
+                }
+                /* "БД LIVE" sync badge text is noise on a phone — hide it */
+                .sync-badge {
+                    display: none;
+                }
+                .logo-text p {
+                    display: none;
+                }
+                .tab-btn {
+                    padding: 9px 10px;
+                    font-size: 12px;
+                }
+                #map-shipper,
+                #map-carrier {
+                    height: 260px;
+                }
+                .toast {
+                    min-width: 0;
+                    max-width: none;
+                    left: 12px;
+                    right: 12px;
+                }
+                .toast-container {
+                    left: 0;
+                    right: 0;
+                    bottom: 12px;
+                    align-items: stretch;
+                    padding: 0 12px;
+                }
+                .footer-bar {
+                    flex-direction: column;
+                    gap: 6px;
+                    text-align: center;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <!-- ══════ HEADER ══════ -->
+        <header class="header">
+            <div class="logo-icon">
+                <img src="download.svg" alt="Download" />
+            </div>
+            <div class="logo-text">
+                <h1>GEO-kernel<span class="badge-mvp">MVP</span></h1>
+                <p>B2B-Маркетплейс грузоперевозок</p>
+            </div>
+            <div class="header-center">
+                <div class="tab-switch">
+                    <button
+                        class="tab-btn active"
+                        id="tab-shipper"
+                        onclick="switchTab('shipper')"
+                    >
+                        💼 Грузоотправитель (МСБ)
+                    </button>
+                    <button
+                        class="tab-btn"
+                        id="tab-carrier"
+                        onclick="switchTab('carrier')"
+                    >
+                        🚛 Перевозчик региона
+                    </button>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="sync-badge">
+                    <span class="sync-dot"></span>
+                    <span
+                        style="
+                            display: flex;
+                            flex-direction: column;
+                            line-height: 1.2;
+                        "
+                    >
+                        <span
+                            style="
+                                font-size: 10px;
+                                font-weight: 700;
+                                color: var(--emerald);
+                            "
+                            >БД LIVE-СИНХРОНИЗИРОВАНА</span
+                        >
+                        <span style="font-size: 10px"
+                            >Актау (Мангистау, РК)</span
+                        >
+                    </span>
+                </div>
+                <div style="position: relative">
+                    <button
+                        class="notif-btn"
+                        onclick="toggleNotifPanel()"
+                        id="notif-btn"
+                    >
+                        🔔
+                        <span
+                            class="notif-badge"
+                            id="notif-badge"
+                            style="display: none"
+                            >0</span
+                        >
+                    </button>
+                    <div class="notif-panel hidden" id="notif-panel">
+                        <div class="notif-panel-header">Уведомления</div>
+                        <div class="notif-list" id="notif-list">
+                            <div class="notif-item">
+                                <span
+                                    style="
+                                        color: var(--text2);
+                                        font-size: 13px;
+                                        padding: 8px;
+                                    "
+                                    >Нет новых уведомлений</span
+                                >
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ══════ CARRIER INFO BANNER ══════ -->
+        <div class="info-banner hidden" id="carrier-banner">
+            Вы находитесь в кабинете ПЕРЕВОЗЧИКА: выберите Демо-водителя,
+            смотрите ленту грузов и берите заказы. &nbsp;<a
+                onclick="switchTab('shipper')"
+                >Сменить кабинет →</a
+            >
+        </div>
+
+        <!-- ══════ SHIPPER CABINET ══════ -->
+        <div id="view-shipper" class="main three-col">
+            <!-- LEFT: Form -->
+            <div style="display: flex; flex-direction: column; gap: 16px">
+                <div class="card">
+                    <div class="card-title">
+                        <span class="icon">📋</span>Новая заявка на перевозку
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Откуда</label>
+                            <select
+                                class="form-control"
+                                id="s-from"
+                                onchange="updateMap()"
+                            >
+                                <option>Актау</option>
+                                <option>Жанаозен</option>
+                                <option>Курык</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Куда</label>
+                            <select
+                                class="form-control"
+                                id="s-to"
+                                onchange="updateMap()"
+                            >
+                                <option>Бейнеу</option>
+                                <option>Жанаозен</option>
+                                <option>Шетпе</option>
+                                <option>Курык</option>
+                                <option>Форт-Шевченко</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Компания / ИП</label>
+                            <input
+                                class="form-control"
+                                id="s-company"
+                                placeholder='ТОО "Ваша компания"'
+                                value='ТОО "Мангистау Курылыс"'
+                            />
+                        </div>
+                        <div class="form-group">
+                            <label>Телефон</label>
+                            <input
+                                class="form-control"
+                                id="s-phone"
+                                placeholder="+7 7XX XXX XX XX"
+                                value="+7 701 000 11 22"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Вид груза</label>
+                            <select
+                                class="form-control"
+                                id="s-cargo-type"
+                                onchange="updateBilling()"
+                            >
+                                <option value="cement">Цемент в мешках</option>
+                                <option value="food">Продукты питания</option>
+                                <option value="equipment">
+                                    Нефтяное оборудование
+                                </option>
+                                <option value="general">Буровые трубы</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Вес (тонн)</label>
+                            <input
+                                class="form-control"
+                                id="s-tons"
+                                type="number"
+                                min="1"
+                                max="30"
+                                value="20"
+                                oninput="updateBilling()"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="form-row" style="grid-template-columns: 1fr">
+                        <div class="form-group">
+                            <label>Дата готовности</label>
+                            <input
+                                class="form-control"
+                                id="s-date"
+                                type="date"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="billing-box">
+                        <div class="billing-header">
+                            <span class="billing-label"
+                                >🧾 Тариф Смарт-Биллинг</span
+                            >
+                            <span class="badge-optimal">Оптимальная цена</span>
+                        </div>
+                        <div class="billing-formula" id="billing-formula">
+                            — км × 500₸ + —т × 8,000₸ + 25,000₸
+                        </div>
+                        <div class="billing-price" id="billing-price">—</div>
+                    </div>
+
+                    <button class="btn btn-primary" onclick="submitOrder()">
+                        🚀 Разместить заказ в Live-эфир
+                    </button>
+                </div>
+
+                <div class="footer-bar" style="border-radius: var(--radius)">
+                    <span>🔵 3000+ ПЕРЕВОЗЧИКОВ СЕТИ</span>
+                    <span
+                        style="
+                            font-family: &quot;JetBrains Mono&quot;, monospace;
+                            font-size: 11px;
+                        "
+                        >MAN-LINK MVP</span
+                    >
+                </div>
+            </div>
+
+            <!-- RIGHT: Map + Orders -->
+            <div style="display: flex; flex-direction: column; gap: 16px">
+                <div class="card" style="padding: 16px">
+                    <div id="map-shipper"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <span class="icon">📋</span>История ваших заявок
+                    </div>
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>РЕЙС / ГРУЗ</th>
+                                <th>МАРШРУТ</th>
+                                <th>ЦЕНА (₸)</th>
+                                <th>СТАТУС</th>
+                                <th>ИСПОЛНИТЕЛЬ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="shipper-orders-body">
+                            <tr>
+                                <td colspan="5" class="empty-state">
+                                    <div class="big">📦</div>
+                                    Нет заявок
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════ CARRIER CABINET ══════ -->
+        <div id="view-carrier" class="main three-col hidden">
+            <!-- LEFT: Profile + Filters -->
+            <div style="display: flex; flex-direction: column; gap: 16px">
+                <div class="card">
+                    <div class="card-title">
+                        <span class="icon">👤</span>Ваш профиль перевозчика
+                        <span
+                            style="
+                                font-size: 10px;
+                                color: var(--text2);
+                                font-weight: 400;
+                                text-transform: uppercase;
+                                letter-spacing: 0.5px;
+                            "
+                            >ВЫБОР ДЕМО-АККАУНТА ВОДИТЕЛЯ</span
+                        >
+                    </div>
+                    <div class="form-group" style="margin-bottom: 14px">
+                        <label>Сменить водителя:</label>
+                        <select
+                            class="form-control"
+                            id="driver-select"
+                            onchange="selectDriver()"
+                        ></select>
+                    </div>
+                    <div
+                        id="driver-details"
+                        style="display: flex; flex-direction: column; gap: 0"
+                    ></div>
+                </div>
+
+                <div class="card">
+                    <div class="filter-title">
+                        <span>⚙️</span> Фильтры заказов в регионе
+                    </div>
+                    <div class="form-group" style="margin-bottom: 8px">
+                        <div class="range-row">
+                            <span>Грузоподъёмность автомобиля</span>
+                            <span class="range-val" id="cap-val">30 т</span>
+                        </div>
+                        <input
+                            type="range"
+                            min="1"
+                            max="30"
+                            value="30"
+                            id="cap-range"
+                            oninput="filterFeed()"
+                        />
+                    </div>
+                    <div class="form-group">
+                        <label>Спецификация кузова</label>
+                        <select
+                            class="form-control"
+                            id="body-filter"
+                            onchange="filterFeed()"
+                        >
+                            <option value="">Все кузовы</option>
+                            <option value="cement">Цемент / Самосвал</option>
+                            <option value="food">
+                                Продукты / Рефрижератор
+                            </option>
+                            <option value="equipment">
+                                Оборудование / Борт
+                            </option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">
+                        <span class="icon">ℹ️</span>Инфо-Справка для Водителей
+                    </div>
+                    <div class="info-box">
+                        В Mangystau Cargo Link все заказы рассчитываются по
+                        прозрачному тарифу ТОО. Свободные водители могут
+                        откликаться на грузы одним касанием. Изменение Вашего
+                        статуса мгновенно транслируется отправителю.
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Map + Active + Feed -->
+            <div style="display: flex; flex-direction: column; gap: 16px">
+                <div class="card" style="padding: 16px">
+                    <div class="card-title">
+                        <span class="icon">🗺️</span>Карта Вашего маршрута
+                        доставки
+                    </div>
+                    <div id="map-carrier"></div>
+                </div>
+
+                <div class="card" id="active-trips-card">
+                    <div class="active-trip-header" style="margin-bottom: 12px">
+                        <div class="active-trip-dot"></div>
+                        <span class="active-trip-label"
+                            >Ваш активный рейс ("В пути")</span
+                        >
+                    </div>
+                    <div id="active-trips-list">
+                        <div class="empty-state" style="padding: 16px">
+                            <div class="big">🕓</div>
+                            Нет активных рейсов
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="live-feed-header">
+                        <div class="card-title" style="margin-bottom: 0">
+                            <span class="icon">📡</span>Лента доступных заказов
+                            региона
+                        </div>
+                        <span class="live-count" id="feed-count"
+                            >В ЭФИРЕ: 0 ЗАЯВОК</span
+                        >
+                    </div>
+                    <div id="live-feed-list">
+                        <div class="empty-state">
+                            <div class="big">📭</div>
+                            Нет доступных заказов
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── TOASTS ── -->
+        <div class="toast-container" id="toast-container"></div>
+
+        <script>
+            // ═══════════════════════════════════════════════════
+            // STATE
+            // ═══════════════════════════════════════════════════
+            let currentTab = "shipper";
+            let allOrders = [];
+            let allDrivers = [];
+            let selectedDriver = null;
+            let notifCount = 0;
+            let notifOpen = false;
+            const notifs = [];
+
+            // City coordinates
+            const CITIES = {
+                Актау: [43.6527, 51.1984],
+                Бейнеу: [45.3167, 55.1833],
+                Жанаозен: [43.3417, 52.8583],
+                Шетпе: [44.15, 52.1333],
+                Курык: [43.1833, 51.6667],
+                "Форт-Шевченко": [44.51, 50.26],
+            };
+
+            let mapShipper = null,
+                mapCarrier = null;
+            let shipperRoute = null,
+                carrierRoute = null;
+            let carrierMarkers = [];
+
+            // ═══════════════════════════════════════════════════
+            // INIT
+            // ═══════════════════════════════════════════════════
+            document.addEventListener("DOMContentLoaded", async () => {
+                // default date
+                const today = new Date();
+                today.setDate(today.getDate() + 2);
+                document.getElementById("s-date").value = today
+                    .toISOString()
+                    .split("T")[0];
+
+                await Promise.all([loadOrders(), loadDrivers()]);
+                initMapShipper();
+                initMapCarrier();
+                updateBilling();
+                connectSSE();
+
+                document.addEventListener("click", (e) => {
+                    if (
+                        !document.getElementById("notif-btn").contains(e.target)
+                    ) {
+                        document
+                            .getElementById("notif-panel")
+                            .classList.add("hidden");
+                        notifOpen = false;
+                    }
+                });
+            });
+
+            async function loadOrders() {
+                const res = await fetch("/api/orders");
+                allOrders = await res.json();
+                renderShipperOrders();
+                renderCarrierFeed();
+                renderActiveTrips();
+            }
+
+            async function loadDrivers() {
+                const res = await fetch("/api/drivers");
+                allDrivers = await res.json();
+                populateDriverSelect();
+                if (allDrivers.length) {
+                    selectedDriver = allDrivers[0];
+                    renderDriverDetails();
+                }
+            }
+
+            // ═══════════════════════════════════════════════════
+            // TAB SWITCH
+            // ═══════════════════════════════════════════════════
+            function switchTab(tab) {
+                currentTab = tab;
+                document
+                    .getElementById("view-shipper")
+                    .classList.toggle("hidden", tab !== "shipper");
+                document
+                    .getElementById("view-carrier")
+                    .classList.toggle("hidden", tab !== "carrier");
+                document
+                    .getElementById("tab-shipper")
+                    .classList.toggle("active", tab === "shipper");
+                document
+                    .getElementById("tab-carrier")
+                    .classList.toggle("active", tab === "carrier");
+                document
+                    .getElementById("carrier-banner")
+                    .classList.toggle("hidden", tab !== "carrier");
+                setTimeout(() => {
+                    if (tab === "shipper" && mapShipper)
+                        mapShipper.invalidateSize();
+                    if (tab === "carrier" && mapCarrier)
+                        mapCarrier.invalidateSize();
+                }, 100);
+            }
+
+            // ═══════════════════════════════════════════════════
+            // MAP — SHIPPER
+            // ═══════════════════════════════════════════════════
+            function initMapShipper() {
+                mapShipper = L.map("map-shipper", {
+                    zoomControl: true,
+                }).setView([43.9, 52.5], 7);
+                L.tileLayer(
+                    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    {
+                        attribution:
+                            '© <a href="https://leaflet.js.com">Leaflet</a> | © OpenStreetMap contributors',
+                    },
+                ).addTo(mapShipper);
+
+                // Driver markers
+                const driverIcons = ["🟢", "🟠"];
+                allDrivers.forEach((d, i) => {
+                    const coord =
+                        Object.values(CITIES)[i % Object.values(CITIES).length];
+                    const icon = L.divIcon({
+                        html: `<div style="font-size:22px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.3))">🚛</div>`,
+                        className: "",
+                        iconSize: [30, 30],
+                    });
+                    L.marker(coord, { icon })
+                        .addTo(mapShipper)
+                        .bindPopup(
+                            `<b>${d.name}</b><br>${d.truckType}<br>${d.status === "free" ? "🟢 Свободен" : "🟠 Занят"}`,
+                        );
+                });
+
+                // Legend
+                const legend = L.control({ position: "bottomleft" });
+                legend.onAdd = () => {
+                    const d = L.DomUtil.create("div");
+                    d.style.cssText =
+                        "background:#fff;padding:10px 14px;border-radius:8px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);line-height:1.8";
+                    d.innerHTML =
+                        '<b>Обозначения:</b><br><span style="color:#10b981">●</span> Перевозчик свободен<br><span style="color:#f59e0b">●</span> Перевозчик занят';
+                    return d;
+                };
+                legend.addTo(mapShipper);
+
+                updateMap();
+            }
+
+            async function updateMap() {
+                const from = document.getElementById("s-from").value;
+                const to = document.getElementById("s-to").value;
+                updateBilling();
+                if (!mapShipper) return;
+
+                const fromCoord = CITIES[from],
+                    toCoord = CITIES[to];
+                if (!fromCoord || !toCoord) return;
+
+                if (shipperRoute) {
+                    mapShipper.removeLayer(shipperRoute);
+                    shipperRoute = null;
+                }
+
+                // Draw straight line as fallback, try OSRM
+                try {
+                    const url = `https://router.project-osrm.org/route/v1/driving/${fromCoord[1]},${fromCoord[0]};${toCoord[1]},${toCoord[0]}?overview=full&geometries=geojson`;
+                    const res = await fetch(url);
+                    const data = await res.json();
+                    if (data.routes && data.routes[0]) {
+                        shipperRoute = L.geoJSON(data.routes[0].geometry, {
+                            style: {
+                                color: "#0172a3",
+                                weight: 4,
+                                opacity: 0.8,
+                            },
+                        }).addTo(mapShipper);
+                        const km = Math.round(data.routes[0].distance / 1000);
+                        const bounds = L.latLngBounds([fromCoord, toCoord]);
+                        mapShipper.fitBounds(bounds.pad(0.3));
+                        // Update billing with real km
+                        window._routeKm = km;
+                        updateBilling();
+                    }
+                } catch {
+                    shipperRoute = L.polyline([fromCoord, toCoord], {
+                        color: "#0172a3",
+                        weight: 4,
+                        dashArray: "8,4",
+                    }).addTo(mapShipper);
+                    const bounds = L.latLngBounds([fromCoord, toCoord]);
+                    mapShipper.fitBounds(bounds.pad(0.3));
+                }
+
+                // Markers A / B
+                const iconA = L.divIcon({
+                    html: `<div style="background:#0172a3;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;box-shadow:0 2px 6px rgba(1,114,163,.5)">A</div>`,
+                    className: "",
+                    iconSize: [28, 28],
+                });
+                const iconB = L.divIcon({
+                    html: `<div style="background:#10b981;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;box-shadow:0 2px 6px rgba(16,185,129,.5)">B</div>`,
+                    className: "",
+                    iconSize: [28, 28],
+                });
+                if (window._markerA) mapShipper.removeLayer(window._markerA);
+                if (window._markerB) mapShipper.removeLayer(window._markerB);
+                window._markerA = L.marker(fromCoord, { icon: iconA })
+                    .addTo(mapShipper)
+                    .bindPopup(`📍 Погрузка: ${from}`);
+                window._markerB = L.marker(toCoord, { icon: iconB })
+                    .addTo(mapShipper)
+                    .bindPopup(`🏁 Назначение: ${to}`);
+            }
+
+            // ═══════════════════════════════════════════════════
+            // MAP — CARRIER
+            // ═══════════════════════════════════════════════════
+            function initMapCarrier() {
+                mapCarrier = L.map("map-carrier").setView([43.9, 52.5], 7);
+                L.tileLayer(
+                    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    {
+                        attribution: "© OpenStreetMap contributors",
+                    },
+                ).addTo(mapCarrier);
+
+                const legend = L.control({ position: "bottomleft" });
+                legend.onAdd = () => {
+                    const d = L.DomUtil.create("div");
+                    d.style.cssText =
+                        "background:#fff;padding:10px 14px;border-radius:8px;font-size:12px;box-shadow:0 2px 8px rgba(0,0,0,.15);line-height:1.8";
+                    d.innerHTML =
+                        '<b>Обозначения:</b><br><span style="color:#10b981">●</span> Перевозчик свободен<br><span style="color:#f59e0b">●</span> Перевозчик занят';
+                    return d;
+                };
+                legend.addTo(mapCarrier);
+                renderCarrierMap();
+            }
+
+            function renderCarrierMap() {
+                if (!mapCarrier) return;
+                carrierMarkers.forEach((m) => mapCarrier.removeLayer(m));
+                carrierMarkers = [];
+                allDrivers.forEach((d, i) => {
+                    const positions = Object.values(CITIES);
+                    const coord = positions[i % positions.length];
+                    const color = d.status === "free" ? "#10b981" : "#f59e0b";
+                    const icon = L.divIcon({
+                        html: `<div style="background:${color};border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 2px 6px rgba(0,0,0,.25);border:2px solid #fff">🚛</div>`,
+                        className: "",
+                        iconSize: [32, 32],
+                    });
+                    const m = L.marker(coord, { icon })
+                        .addTo(mapCarrier)
+                        .bindPopup(
+                            `<b>${d.name}</b><br>${d.truckType}<br>${d.status === "free" ? "🟢 Свободен" : "🟠 Занят"}`,
+                        );
+                    carrierMarkers.push(m);
+                });
+            }
+
+            // ═══════════════════════════════════════════════════
+            // BILLING
+            // ═══════════════════════════════════════════════════
+            const KM_TABLE = {
+                "Актау-Бейнеу": 460,
+                "Актау-Жанаозен": 150,
+                "Актау-Шетпе": 320,
+                "Актау-Курык": 75,
+                "Актау-Форт-Шевченко": 130,
+                "Жанаозен-Бейнеу": 310,
+                "Жанаозен-Курык": 120,
+            };
+
+            function getKm() {
+                if (window._routeKm) return window._routeKm;
+                const from = document.getElementById("s-from")?.value || "";
+                const to = document.getElementById("s-to")?.value || "";
+                return (
+                    KM_TABLE[`${from}-${to}`] ||
+                    KM_TABLE[`${to}-${from}`] ||
+                    200
+                );
+            }
+
+            function updateBilling() {
+                const tons =
+                    parseFloat(document.getElementById("s-tons")?.value) || 0;
+                const km = getKm();
+                const price = 25000 + km * 500 + tons * 8000;
+                const f = (n) => n.toLocaleString("ru-RU");
+                document.getElementById("billing-formula").textContent =
+                    `${km}км × 500₸ + ${tons}т × 8,000₸ + 25k`;
+                document.getElementById("billing-price").textContent =
+                    f(price) + " ₸";
+            }
+
+            // ═══════════════════════════════════════════════════
+            // SUBMIT ORDER
+            // ═══════════════════════════════════════════════════
+            async function submitOrder() {
+                const from = document.getElementById("s-from").value;
+                const to = document.getElementById("s-to").value;
+                const cargo =
+                    document.getElementById("s-cargo-type").options[
+                        document.getElementById("s-cargo-type").selectedIndex
+                    ].text;
+                const cargoType = document.getElementById("s-cargo-type").value;
+                const tons = parseFloat(
+                    document.getElementById("s-tons").value,
+                );
+                const date = document.getElementById("s-date").value;
+                const shipperName = document.getElementById("s-company").value;
+                const shipperPhone = document.getElementById("s-phone").value;
+                const km = getKm();
+                const price = 25000 + km * 500 + tons * 8000;
+
+                if (!shipperName || !date) {
+                    showToast(
+                        "⚠️",
+                        "Заполните все поля",
+                        "Укажите компанию и дату",
+                    );
+                    return;
+                }
+
+                const btn = document.querySelector(
+                    "#view-shipper .btn-primary",
+                );
+                btn.disabled = true;
+                btn.textContent = "⏳ Публикация...";
+
+                try {
+                    const res = await fetch("/api/orders", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            cargo,
+                            cargoType,
+                            tons,
+                            from,
+                            to,
+                            km,
+                            price,
+                            date,
+                            shipperName,
+                            shipperPhone,
+                        }),
+                    });
+                    const order = await res.json();
+                    allOrders.unshift(order);
+                    renderShipperOrders();
+                    renderCarrierFeed();
+                    showToast(
+                        "🚀",
+                        "Заказ опубликован!",
+                        `${cargo} • ${from} → ${to} • ${price.toLocaleString("ru-RU")} ₸`,
+                    );
+                    window._routeKm = null;
+                    updateBilling();
+                } catch {
+                    showToast("❌", "Ошибка", "Не удалось создать заказ");
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = "🚀 Разместить заказ в Live-эфир";
+                }
+            }
+
+            // ═══════════════════════════════════════════════════
+            // RENDER SHIPPER ORDERS
+            // ═══════════════════════════════════════════════════
+            function renderShipperOrders() {
+                const tbody = document.getElementById("shipper-orders-body");
+                if (!allOrders.length) {
+                    tbody.innerHTML =
+                        '<tr><td colspan="5" class="empty-state"><div class="big">📦</div>Нет заявок</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = allOrders
+                    .map((o) => {
+                        const driver = o.driverId
+                            ? allDrivers.find((d) => d.id === o.driverId)
+                            : null;
+                        const statusLabel =
+                            {
+                                available: "Ожидает",
+                                in_transit: "В пути",
+                                delivered: "Доставлен",
+                            }[o.status] || o.status;
+                        const statusClass =
+                            {
+                                available: "status-available",
+                                in_transit: "status-in_transit",
+                                delivered: "status-delivered",
+                            }[o.status] || "";
+                        return `
+      <tr>
+        <td><div class="order-cargo">${o.cargo}</div><div class="order-meta">${o.tons} тонн • ${o.date}</div></td>
+        <td><div class="order-route">${o.from} → ${o.to}</div><div class="order-meta">~${o.km} км</div></td>
+        <td><div class="order-price">${o.price.toLocaleString("ru-RU")}</div></td>
+        <td><span class="status ${statusClass}">${statusLabel}</span></td>
+        <td>${driver ? `<div class="driver-name">${driver.name}</div><div class="driver-phone">📞 ${driver.phone}</div>` : '<span style="color:var(--text3)">—</span>'}</td>
+      </tr>`;
+                    })
+                    .join("");
+            }
+
+            // ═══════════════════════════════════════════════════
+            // CARRIER: DRIVER SELECT
+            // ═══════════════════════════════════════════════════
+            function populateDriverSelect() {
+                const sel = document.getElementById("driver-select");
+                sel.innerHTML = allDrivers
+                    .map(
+                        (d) =>
+                            `<option value="${d.id}">${d.name} (${d.truckType})</option>`,
+                    )
+                    .join("");
+            }
+
+            function selectDriver() {
+                const id = document.getElementById("driver-select").value;
+                selectedDriver = allDrivers.find((d) => d.id === id) || null;
+                renderDriverDetails();
+                renderActiveTrips();
+                filterFeed();
+            }
+
+            function renderDriverDetails() {
+                const d = selectedDriver;
+                if (!d) return;
+                const statusClass =
+                    d.status === "free" ? "status-free" : "status-busy";
+                const statusLabel = d.status === "free" ? "Свободен" : "Занят";
+                document.getElementById("driver-details").innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase">СТАТУС:</span>
+      <span class="status ${statusClass}">${statusLabel}</span>
+    </div>
+    <div class="driver-info-row"><span class="driver-info-label">Автомобиль:</span><span class="driver-info-value">${d.truckType}</span></div>
+    <div class="driver-info-row"><span class="driver-info-label">Гос. Номер:</span><span class="driver-info-value">${d.plate}</span></div>
+    <div class="driver-info-row"><span class="driver-info-label">Рейтинг:</span><span class="driver-info-value"><span class="rating-stars">★</span> ${d.rating} • (${d.trips} поездок)</span></div>
+    <div class="driver-info-row"><span class="driver-info-label">Телефон:</span><span class="driver-info-value">${d.phone}</span></div>
+  `;
+            }
+
+            // ═══════════════════════════════════════════════════
+            // CARRIER: LIVE FEED
+            // ═══════════════════════════════════════════════════
+            function filterFeed() {
+                const capVal = parseInt(
+                    document.getElementById("cap-range").value,
+                );
+                document.getElementById("cap-val").textContent = capVal + " т";
+                renderCarrierFeed(capVal);
+            }
+
+            function renderCarrierFeed(cap) {
+                const bodyFilter =
+                    document.getElementById("body-filter")?.value || "";
+                const capLimit =
+                    cap ||
+                    parseInt(document.getElementById("cap-range")?.value || 30);
+                const available = allOrders.filter((o) => {
+                    if (o.status !== "available") return false;
+                    if (o.tons > capLimit) return false;
+                    if (bodyFilter && o.cargoType !== bodyFilter) return false;
+                    return true;
+                });
+
+                document.getElementById("feed-count").textContent =
+                    `В ЭФИРЕ: ${available.length} ЗАЯВОК`;
+
+                const list = document.getElementById("live-feed-list");
+                if (!available.length) {
+                    list.innerHTML =
+                        '<div class="empty-state"><div class="big">📭</div>Нет доступных заказов</div>';
+                    return;
+                }
+                list.innerHTML = available
+                    .map(
+                        (o) => `
+    <div class="feed-card">
+      <div class="feed-card-header">
+        <div>
+          <div class="feed-cargo-name">${o.cargo}</div>
+          <div class="feed-cargo-tons">${o.tons} тонн • ${o.date}</div>
+        </div>
+        <span class="status status-available">Доступен</span>
+      </div>
+      <div class="feed-route">
+        <strong>${o.from}</strong><span class="feed-arrow">→</span><strong>${o.to}</strong>
+        <span style="color:var(--text3)">~${o.km} км</span>
+      </div>
+      <div class="feed-meta">
+        <div>
+          <div class="feed-price">${o.price.toLocaleString("ru-RU")} ₸</div>
+          <div class="feed-shipper">Отправитель: <strong>${o.shipperName}</strong></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="takeOrder('${o.id}')" ${!selectedDriver || selectedDriver.status === "busy" ? "disabled" : ""}>
+          ${!selectedDriver ? "Выберите водителя" : selectedDriver.status === "busy" ? "Водитель занят" : "✅ Откликнуться"}
+        </button>
+      </div>
+    </div>
+  `,
+                    )
+                    .join("");
+            }
+
+            async function takeOrder(orderId) {
+                if (!selectedDriver) return;
+                try {
+                    const res = await fetch(`/api/orders/${orderId}/take`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ driverId: selectedDriver.id }),
+                    });
+                    if (!res.ok) {
+                        const e = await res.json();
+                        showToast("⚠️", "Ошибка", e.error);
+                        return;
+                    }
+                    const { order, driver } = await res.json();
+                    // Update local state
+                    const idx = allOrders.findIndex((o) => o.id === orderId);
+                    if (idx !== -1) allOrders[idx] = order;
+                    const dIdx = allDrivers.findIndex(
+                        (d) => d.id === driver.id,
+                    );
+                    if (dIdx !== -1) allDrivers[dIdx] = driver;
+                    selectedDriver = driver;
+                    renderDriverDetails();
+                    renderCarrierFeed();
+                    renderActiveTrips();
+                    renderShipperOrders();
+                    showToast(
+                        "🚛",
+                        "Груз взят!",
+                        `${order.cargo} • ${order.from} → ${order.to}`,
+                    );
+                } catch {
+                    showToast("❌", "Ошибка", "Не удалось взять заказ");
+                }
+            }
+
+            // ═══════════════════════════════════════════════════
+            // CARRIER: ACTIVE TRIPS
+            // ═══════════════════════════════════════════════════
+            function renderActiveTrips() {
+                const list = document.getElementById("active-trips-list");
+                if (!selectedDriver) {
+                    list.innerHTML =
+                        '<div class="empty-state" style="padding:16px"><div class="big">👤</div>Выберите водителя</div>';
+                    return;
+                }
+                const active = allOrders.filter(
+                    (o) =>
+                        o.status === "in_transit" &&
+                        o.driverId === selectedDriver.id,
+                );
+                if (!active.length) {
+                    list.innerHTML =
+                        '<div class="empty-state" style="padding:16px"><div class="big">🕓</div>Нет активных рейсов</div>';
+                    return;
+                }
+                list.innerHTML = active
+                    .map(
+                        (o) => `
+    <div class="active-trip" style="margin-bottom:12px">
+      <div class="active-trip-header">
+        <div class="active-trip-dot"></div>
+        <span class="active-trip-label">РЕЙС #${o.id}</span>
+      </div>
+      <div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:10px">${o.cargo} • ${o.tons} т</div>
+      <div class="trip-info-row">
+        <div class="trip-field"><strong>${o.from} → ${o.to}</strong>Маршрут (~${o.km} км)</div>
+        <div class="trip-field"><strong>${o.price.toLocaleString("ru-RU")} ₸</strong>Стоимость фрахта</div>
+      </div>
+      <div class="shipper-contact">
+        <div>
+          <div style="font-size:11px;color:var(--text2)">ОТПРАВИТЕЛЬ:</div>
+          <div style="font-weight:600;font-size:13px">${o.shipperName}</div>
+        </div>
+        <button class="call-btn" onclick="alert('Звоним: ${o.shipperPhone}')">📞 Call</button>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline btn-sm" onclick="showRouteCarrier('${o.from}','${o.to}')">🗺️ Маршрут</button>
+        <button class="btn btn-success btn-sm" style="flex:1" onclick="completeOrder('${o.id}')">✅ Доставлен / Завершить</button>
+      </div>
+    </div>
+  `,
+                    )
+                    .join("");
+            }
+
+            async function completeOrder(orderId) {
+                try {
+                    const res = await fetch(`/api/orders/${orderId}/complete`, {
+                        method: "POST",
+                    });
+                    const { order, driver } = await res.json();
+                    const idx = allOrders.findIndex((o) => o.id === orderId);
+                    if (idx !== -1) allOrders[idx] = order;
+                    if (driver) {
+                        const dIdx = allDrivers.findIndex(
+                            (d) => d.id === driver.id,
+                        );
+                        if (dIdx !== -1) allDrivers[dIdx] = driver;
+                        selectedDriver = driver;
+                    }
+                    renderDriverDetails();
+                    renderActiveTrips();
+                    renderCarrierFeed();
+                    renderShipperOrders();
+                    showToast(
+                        "🎉",
+                        "Доставка завершена!",
+                        `${order.cargo} • ${order.from} → ${order.to}`,
+                    );
+                } catch {
+                    showToast("❌", "Ошибка", "Не удалось завершить рейс");
+                }
+            }
+
+            async function showRouteCarrier(from, to) {
+                if (!mapCarrier) return;
+                const fromCoord = CITIES[from],
+                    toCoord = CITIES[to];
+                if (!fromCoord || !toCoord) return;
+                if (carrierRoute) {
+                    mapCarrier.removeLayer(carrierRoute);
+                    carrierRoute = null;
+                }
+                try {
+                    const url = `https://router.project-osrm.org/route/v1/driving/${fromCoord[1]},${fromCoord[0]};${toCoord[1]},${toCoord[0]}?overview=full&geometries=geojson`;
+                    const res = await fetch(url);
+                    const data = await res.json();
+                    if (data.routes?.[0]) {
+                        carrierRoute = L.geoJSON(data.routes[0].geometry, {
+                            style: {
+                                color: "#10b981",
+                                weight: 4,
+                                opacity: 0.8,
+                            },
+                        }).addTo(mapCarrier);
+                        mapCarrier.fitBounds(
+                            L.latLngBounds([fromCoord, toCoord]).pad(0.3),
+                        );
+                    }
+                } catch {
+                    carrierRoute = L.polyline([fromCoord, toCoord], {
+                        color: "#10b981",
+                        weight: 4,
+                        dashArray: "8,4",
+                    }).addTo(mapCarrier);
+                    mapCarrier.fitBounds(
+                        L.latLngBounds([fromCoord, toCoord]).pad(0.3),
+                    );
+                }
+            }
+
+            // ═══════════════════════════════════════════════════
+            // SSE — REAL-TIME UPDATES
+            // ═══════════════════════════════════════════════════
+            function connectSSE() {
+                const es = new EventSource("/api/events");
+                es.addEventListener("new_order", (e) => {
+                    const order = JSON.parse(e.data);
+                    if (!allOrders.find((o) => o.id === order.id))
+                        allOrders.unshift(order);
+                    renderShipperOrders();
+                    renderCarrierFeed();
+                    addNotif(
+                        "📦",
+                        `Новый заказ: ${order.cargo}`,
+                        `${order.from} → ${order.to}`,
+                    );
+                    playChime();
+                });
+                es.addEventListener("order_taken", (e) => {
+                    const { order, driver } = JSON.parse(e.data);
+                    const idx = allOrders.findIndex((o) => o.id === order.id);
+                    if (idx !== -1) allOrders[idx] = order;
+                    const dIdx = allDrivers.findIndex(
+                        (d) => d.id === driver.id,
+                    );
+                    if (dIdx !== -1) allDrivers[dIdx] = driver;
+                    renderShipperOrders();
+                    renderCarrierFeed();
+                    renderActiveTrips();
+                    renderCarrierMap();
+                    addNotif(
+                        "🚛",
+                        `Груз взят: ${driver.name}`,
+                        `${order.cargo} • ${order.from} → ${order.to}`,
+                    );
+                    playChime();
+                });
+                es.addEventListener("order_delivered", (e) => {
+                    const { order, driver } = JSON.parse(e.data);
+                    const idx = allOrders.findIndex((o) => o.id === order.id);
+                    if (idx !== -1) allOrders[idx] = order;
+                    if (driver) {
+                        const dIdx = allDrivers.findIndex(
+                            (d) => d.id === driver.id,
+                        );
+                        if (dIdx !== -1) allDrivers[dIdx] = driver;
+                    }
+                    renderShipperOrders();
+                    renderCarrierFeed();
+                    renderActiveTrips();
+                    renderCarrierMap();
+                    addNotif(
+                        "✅",
+                        `Доставлено!`,
+                        `${order.cargo} • ${order.from} → ${order.to}`,
+                    );
+                    playChime();
+                });
+                es.onerror = () => setTimeout(connectSSE, 3000);
+            }
+
+            // ═══════════════════════════════════════════════════
+            // NOTIFICATIONS
+            // ═══════════════════════════════════════════════════
+            function addNotif(icon, title, body) {
+                notifCount++;
+                notifs.unshift({
+                    icon,
+                    title,
+                    body,
+                    time: new Date().toLocaleTimeString("ru-RU", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                    }),
+                });
+                document.getElementById("notif-badge").style.display = "flex";
+                document.getElementById("notif-badge").textContent = notifCount;
+                renderNotifList();
+                showToast(icon, title, body);
+            }
+
+            function renderNotifList() {
+                document.getElementById("notif-list").innerHTML =
+                    notifs
+                        .map(
+                            (n) => `
+    <div class="notif-item">
+      <div class="notif-dot"></div>
+      <div><div class="notif-text">${n.icon} <b>${n.title}</b><br>${n.body}</div><div class="notif-time">${n.time}</div></div>
+    </div>
+  `,
+                        )
+                        .join("") ||
+                    '<div class="notif-item"><span style="color:var(--text2);font-size:13px">Нет уведомлений</span></div>';
+            }
+
+            function toggleNotifPanel() {
+                notifOpen = !notifOpen;
+                document
+                    .getElementById("notif-panel")
+                    .classList.toggle("hidden", !notifOpen);
+                if (notifOpen) {
+                    notifCount = 0;
+                    document.getElementById("notif-badge").style.display =
+                        "none";
+                }
+            }
+
+            // ═══════════════════════════════════════════════════
+            // TOAST
+            // ═══════════════════════════════════════════════════
+            function showToast(icon, title, body) {
+                const container = document.getElementById("toast-container");
+                const toast = document.createElement("div");
+                toast.className = "toast";
+                toast.innerHTML = `<span class="toast-icon">${icon}</span><div><div class="toast-title">${title}</div><div class="toast-body">${body}</div></div>`;
+                container.appendChild(toast);
+                setTimeout(() => {
+                    toast.style.animation = "slideIn .3s ease reverse";
+                    setTimeout(() => toast.remove(), 280);
+                }, 3500);
+            }
+
+            // ═══════════════════════════════════════════════════
+            // AUDIO CHIME (Web Audio API)
+            // ═══════════════════════════════════════════════════
+            function playChime() {
+                try {
+                    const ctx = new (
+                        window.AudioContext || window.webkitAudioContext
+                    )();
+                    const notes = [523.25, 659.25, 783.99];
+                    notes.forEach((freq, i) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.frequency.value = freq;
+                        osc.type = "sine";
+                        gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.12);
+                        gain.gain.linearRampToValueAtTime(
+                            0.18,
+                            ctx.currentTime + i * 0.12 + 0.05,
+                        );
+                        gain.gain.linearRampToValueAtTime(
+                            0,
+                            ctx.currentTime + i * 0.12 + 0.25,
+                        );
+                        osc.start(ctx.currentTime + i * 0.12);
+                        osc.stop(ctx.currentTime + i * 0.12 + 0.3);
+                    });
+                } catch {}
+            }
+        </script>
+    </body>
+</html>
