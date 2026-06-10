@@ -1,4 +1,5 @@
-# 🚛 Geo-kernel — Cargo Link MVP
+# Geo-kernel — Cargo Link MVP
+ <img width="804" height="623" alt="download" src="https://github.com/user-attachments/assets/c796a82b-e939-4fc0-b98a-d8948688aad2" />
 
 A lightweight logistics marketplace that connects **cargo shippers** with **truck drivers**. Shippers post freight orders, drivers browse and accept available loads, and everyone sees updates **in real time** as orders move from *available → in transit → delivered*.
 
